@@ -1,16 +1,14 @@
-// ============================================================
-// input.js — клавиатура и движение/копание игрока.
+// input.js — керування з клавиатури, рух та копання гравця.
 //
-// Управление:
-//   W A S D   — ходьба / копание вверх-вниз-влево-вправо
-//   J         — атака
-//   стрелки и ПРОБЕЛ тоже работают — дублируют WASD и J,
-//   чтобы игра была удобна и тем, кто привык к стрелкам
-//   ESC       — вернуться на поверхность (во время забега)
+// Керування:
+//   W A SD  — ходьба / копання (вгору, вниз, вліво, вправо)
+//   J       — атака
+//   Стрілки та ПРОБІЛ теж працюють — дублюють WASD і J,
+//   щоб гра була зручною і для тих, хто звик до стрілок.
+//   ESC     — повернутися на поверхню (під час забігу)
 //
-// Все клавиши приводятся к нижнему регистру (e.key.toLowerCase()),
-// поэтому не важно, зажат CapsLock или нет.
-// ============================================================
+// Усі клавіші переводяться в нижній регістр (e.key.toLowerCase()),
+// тому стан CapsLock не має значення.
 
 const keys = {};
 let lastMoveAt = 0;
@@ -30,7 +28,7 @@ window.addEventListener('keyup', e=>{
   keys[e.key.toLowerCase()] = false;
 });
 
-// true, если зажата любая из клавиш, отвечающих за данное направление/действие
+// true, якщо затиснута будь-яка з клавіш, що відповідають за вказаний напрямок/дію
 function keyLeft(){  return keys['a'] || keys['arrowleft']; }
 function keyRight(){ return keys['d'] || keys['arrowright']; }
 function keyUp(){    return keys['w'] || keys['arrowup']; }
@@ -44,7 +42,7 @@ function attemptMove(dx, dy){
   const nx = player.x + dx, ny = player.y + dy;
   if(nx < 0 || nx >= COLS) return;
   if(ny < 0) return;
-  if(monsterAt(nx, ny)) return; // нельзя пройти сквозь монстра — нужно атаковать
+  if(monsterAt(nx, ny)) return; // не можна пройти крізь монстра — потрібно атакувати
   const t = getTile(nx, ny);
   if(t === TILES.EMPTY){
     player.x = nx; player.y = ny;
@@ -57,7 +55,7 @@ function attemptMove(dx, dy){
     const bonus = Math.round((80 + player.y*2) * oreValueMultiplier());
     ore += bonus;
     spawnParticles(nx, ny, '#e8a33d');
-    // шанс засады растёт с глубиной
+    // шанс засідки зростає з глибиною
     if(Math.random() < Math.min(0.55, 0.15 + player.y*0.003)){
       const count = player.y > 70 ? 2 : 1;
       for(let i=0;i<count;i++){
@@ -69,10 +67,10 @@ function attemptMove(dx, dy){
     spendOxygen(1.1);
     depth = Math.max(depth, player.y);
   } else {
-    // копаем
+    // копаємо
     const info = TILE_INFO[t];
     const dt = digTimeFor(info.hardness);
-    // instant-dig модель: даём задержку по времени + тратим кислород, потом очищаем тайл
+    // instant-dig модель: даємо затримку за часом + витрачаємо кисень, потім очищаємо тайл
     if(now - lastMoveAt < dt) return;
     setTile(nx, ny, TILES.EMPTY);
     if(info.value > 0){
@@ -84,7 +82,7 @@ function attemptMove(dx, dy){
     lastMoveAt = now;
     spendOxygen(1.1);
     depth = Math.max(depth, player.y);
-    // шанс встретить монстра в открывшейся полости
+    // шанс зустріти монстра у порожнині, що відкрилася
     if(Math.random() < monsterChanceForDepth()){
       spawnMonster(pickMonsterType(), nx, ny);
     }
